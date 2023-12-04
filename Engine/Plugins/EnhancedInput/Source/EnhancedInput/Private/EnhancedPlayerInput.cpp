@@ -200,8 +200,9 @@ void UEnhancedPlayerInput::ProcessActionMappingEvent(TObjectPtr<const UInputActi
 
 		const EInputActionAccumulationBehavior AccumulationBehavior = ActionData.GetSourceAction()->AccumulationBehavior;
 
+		bool bTriggersBlockedAction = (CalcedState == ETriggerState::None) && bMappingTriggersApplied;
 		// Combine values for active events only, selecting the input with the greatest magnitude for each component in each tick.
-		if(ModifiedValue.GetMagnitudeSq())
+		if(ModifiedValue.GetMagnitudeSq() && !bTriggersBlockedAction)
 		{
 			const int32 NumComponents = FMath::Max(1, int32(ValueType));
 			FVector Modified = ModifiedValue.Get<FVector>();
