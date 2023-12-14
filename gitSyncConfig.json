@@ -1,0 +1,20 @@
+{
+    "repo_name": "UnrealEngineEpic",
+    "owner": "CarbonAdmin",
+    "host": "https://217.73.191.2:3000/api/v1/",
+    "token": "a53682833a5c33fd63c894d03e194df6f1b3db78", 
+    "packages": [
+        {
+            "name": "Binaries",
+            "include_patterns": ["*"],
+            "subdir": "LocalBuilds\\UnrealEditorUpdateBinaries",
+            "diff_dir": "LocalBuilds\\UnrealEditorBinaries",
+            "diff_package": "InitialBinaries"
+        },
+        {
+            "name": "InitialBinaries",
+            "include_patterns": ["*"],
+            "subdir": "LocalBuilds\\UnrealEditorBinaries"
+        }
+    ]
+}
