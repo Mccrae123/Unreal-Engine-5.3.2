@@ -3,9 +3,9 @@
 	"MinorVersion": 3,
 	"PatchVersion": 2,
 	"Changelist": 0,
-	"CompatibleChangelist": 27405482,
-	"IsLicenseeVersion": 0,
-	"IsPromotedBuild": 0,
-	"BranchName": "UE5"
+	"CompatibleChangelist": 0,
+	"IsLicenseeVersion": 1,
+	"IsPromotedBuild": 1,
+	"BranchName": "UE5",
+	"BuildId": "CarbonBID"
 }
-
