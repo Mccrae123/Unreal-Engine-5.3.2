@@ -1,7 +1,7 @@
 {
     "repo_name": "UnrealEngineEpic",
     "owner": "CarbonAdmin",
-    "host": "https://217.73.191.2:3000/api/v1/",
+    "host": "https://gitea.carbonstudio.pl/api/v1/",
     "token": "a53682833a5c33fd63c894d03e194df6f1b3db78", 
     "packages": [
         {
