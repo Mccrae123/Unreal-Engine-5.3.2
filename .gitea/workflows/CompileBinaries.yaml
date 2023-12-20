@@ -15,10 +15,6 @@ jobs:
   run-script:
     runs-on: self-hosted
 
- env:
-      CURRENT_REPO_NAME: ""
-      CURRENT_BRANCH: ""
-      REPO_PATH: "NONE"
 
     steps:
     - name: Find and Operate on Submodule
