@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
- 
+
 #include "ActorPickerMode.h"
 #include "Modules/ModuleManager.h"
 #include "EditorModeRegistry.h"
