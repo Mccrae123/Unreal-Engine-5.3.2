@@ -17,8 +17,8 @@ jobs:
 
  env:
       GITEA_ROOT: %GITEA_REPOSITORY_DIR%
-      CURRENT_REPO_NAME: ${{ gitea.repository }}
-      CURRENT_BRANCH: ${{ gitea.ref }}
+      CURRENT_REPO_NAME: ""
+      CURRENT_BRANCH: ""
       REPO_PATH: "NONE"
 
     steps:
