@@ -15,7 +15,7 @@ jobs:
   run-script:
     runs-on: self-hosted
     env:
-      GITEA_ROOT: %GITEA_REPOSITORY_DIR%
+      GITEA_ROOT: "%GITEA_REPOSITORY_DIR%""
       CURRENT_REPO_NAME: ${{ gitea.repository }}
       CURRENT_BRANCH: ${{ gitea.ref }}
       REPO_PATH: "NONE"
