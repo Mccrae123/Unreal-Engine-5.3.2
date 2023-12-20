@@ -19,31 +19,78 @@ jobs:
       GITEA_ROOT: "%GITEA_REPOSITORY_DIR%"
       CURRENT_REPO_NAME: ${{ gitea.repository }}
       CURRENT_BRANCH: ${{ gitea.ref }}
-      REPO_PATH: "NONE"
 
     steps:
-    - name: Find and Operate on Submodule
+    - name: Find engine
       shell: cmd
+      id: set_repo_path
       run: |
-        FOR /D %%D IN ("%GITEA_ROOT%\*") DO (
-          PUSHD "%%D"
-          IF EXIST .git (
-            REM Check if the current directory is the repository we're interested in
-            FOR /F "tokens=*" %%R IN ('git remote get-url origin') DO (
-              SET "REPO_URL=%%R"
-            )
-            FOR /F "tokens=*" %%B IN ('git rev-parse --abbrev-ref HEAD') DO (
-              SET "REPO_BRANCH=%%B"
-            )
-            IF "%REPO_URL%"=="%CURRENT_REPO_NAME%" AND "%REPO_BRANCH%"=="%CURRENT_BRANCH:refs/heads/=%" (
-              ECHO Repository %CURRENT_REPO_NAME% on branch %CURRENT_BRANCH:refs/heads/=% found.
-              git pull
-              SET REPO_PATH = %%D
-            )
-          )
-          POPD
+        SETLOCAL ENABLEDELAYEDEXPANSION
+        SET "REPO_PATH=NONE"
+        SET "QUEUE_FILE=%TEMP%\dirqueue.txt"
+
+        > "!QUEUE_FILE!" ECHO %GITEA_REPOSITORY_DIR%
+
+        :NEXT_DIR
+        SET "DIR="
+        FOR /F "usebackq delims=" %%i IN ("!QUEUE_FILE!") DO (
+          SET "DIR=%%i"
+          GOTO :PROCESS_DIR
         )
-        IF "%REPO_PATH%"=="NONE" (
+        IF "!DIR!"=="" (
           ECHO ERROR: Repository %CURRENT_REPO_NAME% on branch %CURRENT_BRANCH:refs/heads/=% not found.
           EXIT /B 1
-        )        
+        )
+
+        :PROCESS_DIR
+        PUSHD "!DIR!"
+        echo dir "!DIR!"
+        IF EXIST .git (
+          FOR /F "tokens=*" %%R IN ('git remote get-url origin') DO SET "REPO_URL=%%R"
+          FOR /F "tokens=*" %%B IN ('git rev-parse --abbrev-ref HEAD') DO SET "REPO_BRANCH=%%B"
+          IF "!REPO_URL!"=="%CURRENT_REPO_NAME%" AND "!REPO_BRANCH!"=="%CURRENT_BRANCH:refs/heads/=%" (
+            ECHO Repository %CURRENT_REPO_NAME% on branch %CURRENT_BRANCH:refs/heads/=% found.
+            SET "REPO_PATH=!DIR!"
+            GOTO :FOUND
+          )
+        )
+
+        REM Queue subdirectories for the next level
+        FOR /D %%D IN ("!DIR!\*") DO (
+          >> "!QUEUE_FILE!" ECHO %%D
+        )
+
+        REM Remove the processed directory from the queue
+        MORE +1 "!QUEUE_FILE!" > "!QUEUE_FILE!.tmp"
+        MOVE /Y "!QUEUE_FILE!.tmp" "!QUEUE_FILE!"
+
+        POPD
+        GOTO :NEXT_DIR
+
+        :FOUND
+        POPD
+        DEL "!QUEUE_FILE!"
+        ECHO ::set-output name=repo_path::!REPO_PATH!
+        EXIT /B
+
+    - name: Update repository 
+      run: |
+        cd /D "${{steps.set_repo_path.outputs.repo_path}}"
+        git reset --hard HEAD
+        git pull
+        git submodule update --init --recursive
+
+    - name: Compile binaries
+      run: |
+        cd /D "${{steps.set_repo_path.outputs.repo_path}}"
+        Engine\Engine\Build\BatchFiles\RunUAT.bat BuildGraph -Script=%cd%/Scripts/UpdateBinaries.xml -set:StageEditor=true -Target="Copy To Staging Directory"
+
+    - name: Create package 
+      run: |
+        cd  /D "${{steps.set_repo_path.outputs.repo_path}}\Engine"
+        ${{steps.set_repo_path.outputs.repo_path}}\Scripts\GGS.exe create Binaries 
+
+    - name: Update binaries
+      run: |
+        cd /D "${{steps.set_repo_path.outputs.repo_path}}\Engine"
+        "${{steps.set_repo_path.outputs.repo_path}}\Scripts\GGS.exe" update Binaries Binaries.zip
