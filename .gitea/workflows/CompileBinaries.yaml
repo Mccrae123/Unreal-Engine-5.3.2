@@ -1,0 +1,50 @@
+name: Compile binaries
+
+on:
+  push:
+    paths:
+      - '**/*.h'
+      - '**/*.cpp'
+      - '**/*.cs'
+
+defaults:
+  run:
+    shell: cmd
+
+jobs:
+  run-script:
+    runs-on: self-hosted
+
+ env:
+      GITEA_ROOT: %GITEA_REPOSITORY_DIR%
+      CURRENT_REPO_NAME: ${{ gitea.repository }}
+      CURRENT_BRANCH: ${{ gitea.ref }}
+      REPO_PATH: "NONE"
+
+    steps:
+    - name: Find and Operate on Submodule
+      shell: cmd
+      run: |
+        FOR /D %%D IN ("%GITEA_ROOT%\*") DO (
+          PUSHD "%%D"
+          IF EXIST .git (
+            REM Check if the current directory is the repository we're interested in
+            FOR /F "tokens=*" %%R IN ('git remote get-url origin') DO (
+              SET "REPO_URL=%%R"
+            )
+            FOR /F "tokens=*" %%B IN ('git rev-parse --abbrev-ref HEAD') DO (
+              SET "REPO_BRANCH=%%B"
+            )
+            IF "%REPO_URL%"=="%CURRENT_REPO_NAME%" AND "%REPO_BRANCH%"=="%CURRENT_BRANCH:refs/heads/=%" (
+              ECHO Repository %CURRENT_REPO_NAME% on branch %CURRENT_BRANCH:refs/heads/=% found.
+              git pull
+              SET REPO_PATH = %%D
+            )
+          )
+          POPD
+        )
+        IF "%REPO_PATH%"=="NONE" (
+          ECHO ERROR: Repository %CURRENT_REPO_NAME% on branch %CURRENT_BRANCH:refs/heads/=% not found.
+          EXIT /B 1
+        )
+
