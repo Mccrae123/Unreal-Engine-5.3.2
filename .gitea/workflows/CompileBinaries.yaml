@@ -6,7 +6,7 @@ on:
       - '**/*.h'
       - '**/*.cpp'
       - '**/*.cs'
-
+  workflow_dispatch:
 defaults:
   run:
     shell: cmd
@@ -14,9 +14,9 @@ defaults:
 jobs:
   run-script:
     runs-on: self-hosted
-
- env:
-      GITEA_ROOT: %GITEA_REPOSITORY_DIR%
+    
+    env:
+      GITEA_ROOT: "%GITEA_REPOSITORY_DIR%"
       CURRENT_REPO_NAME: ${{ gitea.repository }}
       CURRENT_BRANCH: ${{ gitea.ref }}
       REPO_PATH: "NONE"
@@ -46,5 +46,4 @@ jobs:
         IF "%REPO_PATH%"=="NONE" (
           ECHO ERROR: Repository %CURRENT_REPO_NAME% on branch %CURRENT_BRANCH:refs/heads/=% not found.
           EXIT /B 1
-        )
-
+        )        
