@@ -6,7 +6,7 @@ on:
       - '**/*.h'
       - '**/*.cpp'
       - '**/*.cs'
-
+  workflow_dispatch:
 defaults:
   run:
     shell: cmd
@@ -14,6 +14,7 @@ defaults:
 jobs:
   run-script:
     runs-on: self-hosted
+    
     env:
       GITEA_ROOT: "%GITEA_REPOSITORY_DIR%"
       CURRENT_REPO_NAME: ${{ gitea.repository }}
